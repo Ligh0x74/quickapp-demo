@@ -1,6 +1,5 @@
 <import name="task-page" src="../TaskPage/index.ux"></import>
  
-
 <template>
   <div>
     <task-page></task-page>
@@ -15,7 +14,7 @@ export default {
 
   },
   onInit() {
-    this.$page.setTitleBar({ text: 'To Do' });
+    // this.$page.setTitleBar({ text: 'To Do' });
   },
   // detail() {
   //   router.push({

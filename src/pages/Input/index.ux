@@ -1,0 +1,146 @@
+<template>
+  <div class="input">
+    <div class="header-area">
+      <text class="header-text">Add Task</text>
+    </div>
+
+    <div class="form-area">
+      <text>Task Name</text>
+      <div class="text-area">
+        <input
+          type="text"
+          placeholder="Task Name"
+          class="input-text"
+          model:value="{{name}}"
+        />
+      </div>
+
+      <text>Deadline</text>
+      <div class="date-area">
+        <picker
+          class="date-picker"
+          type="date"
+          value="{{deadline}}"
+          @change="getDeadline()"
+        ></picker>
+      </div>
+
+      <div class="btn-area">
+        <input type="button" value="OK" class="input-btn" @click="addTask" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import prompt from '@system.prompt'
+import storage from '@system.storage'
+import router from '@system.router'
+
+export default {
+  data: {
+    name: '',
+    deadline: ''
+  },
+  onInit() {
+    // 初始化截止日期
+    const date = new Date();
+    const Y = date.getFullYear();
+    const M = date.getMonth() + 1;
+    const D = date.getDate();
+    this.deadline = Y + '-' + M + '-' + D;
+  },
+  //获取截止日期更新
+  getDeadline(e) {
+    this.deadline = e.year + '-' + (e.month + 1) + '-' + e.day;
+  },
+  //存储任务并返回任务列表
+  addTask() {
+    if (this.name === '') {
+      prompt.showToast({
+        message: 'Task Name can not be null!'
+      })
+    }
+    else {
+      let task = {
+        name: this.name,
+        deadline: this.deadline
+      };
+      let that = this;
+      storage.set({
+        key: 'task',
+        value: task,
+        success: function (data) {
+          console.log('handling success');
+          router.back();
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`);
+        }
+      });
+    }
+  }
+}
+</script>
+
+<style>
+/* 基本样式 */
+
+.input {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(243, 245, 250);
+}
+
+.header-area {
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.form-area {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+}
+
+.text-area,
+.date-area {
+  margin: 10px;
+}
+
+.btn-area {
+  align-self: flex-end;
+  padding: 20px;
+}
+
+/* 文本样式 */
+
+text {
+  color: #000000;
+  font-size: 40px;
+  width: 100%;
+  padding-left: 10px;
+}
+
+.header-text {
+  font-size: 60px;
+}
+
+/* 表单样式 */
+.input-text,
+.date-picker {
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #000000;
+  border-radius: 5px;
+}
+
+.input-btn {
+  width: 30%;
+  background-color: rgb(243, 245, 250);
+  border-radius: 5px;
+}
+</style>
