@@ -1,0 +1,30 @@
+<import name="task-page" src="../TaskPage/index.ux"></import>
+ 
+
+<template>
+  <div>
+    <task-page></task-page>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  private: {
+
+  },
+  onInit() {
+    this.$page.setTitleBar({ text: 'To Do' });
+  },
+  // detail() {
+  //   router.push({
+  //     uri: 'pages/TaskPage'
+  //   })
+  // }
+}
+</script>
+
+<style>
+
+</style>

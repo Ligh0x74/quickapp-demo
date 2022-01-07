@@ -1,0 +1,44 @@
+<template>
+  <div class="input">
+    <div>
+      <input type="checkbox"/>
+      <input type="text" placeholder="添加任务"/>
+      <input type="button" />
+    </div>
+    <div>
+      <text>截止日期</text>
+      <div class="date-input">
+        <picker class="date-picker" type="date" value="{{deadline}}"></picker>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    deadline: ''
+  },
+  onInit() {
+    // 初始化截止日期
+    const date = new Date();
+    const Y = date.getFullYear();
+    const M = date.getMonth() + 1;
+    const D = date.getDate();
+    this.deadline = Y + '-' + M + '-' + D;
+  },
+}
+</script>
+
+<style>
+.input {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  bottom: 0px;
+}
+
+.date-picker {
+  width: 100px;
+}
+</style>
