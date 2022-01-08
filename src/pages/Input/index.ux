@@ -38,6 +38,12 @@
 
       <!-- 提交按钮 -->
       <div class="btn-area">
+        <image
+          src="../../assets/images/delete.png"
+          class="image-del"
+          if="{{isShowDel}}"
+          @click="delTask"
+        ></image>
         <input type="button" value="OK" class="input-btn" @click="addTask" />
       </div>
     </div>
@@ -65,14 +71,29 @@ export default {
     name: '',
     deadline: '',
     isShowAsr: false,
-    asrName: ''
+    asrName: '',
+    isShowDel: false,
+    //修改的任务
+    task: {},
+    index: 0,
+    isModify: false,
+    isDone: false
   },
   onInit() {
     this.initAsr();
     this.initDate();
+    this.isModify = JSON.parse(this.isModify);
+    //初始化修改任务
+    if (this.isModify) {
+      this.isShowDel = true;
+      this.name = JSON.parse(this.task).name;
+      this.deadline = JSON.parse(this.task).deadline;
+      this.index = JSON.parse(this.index);
+      this.isDone = JSON.parse(this.isDone);
+    }
   },
   onDestroy() {
-    // asr.close();
+    asr.close();
   },
   // 初始化截止日期
   initDate() {
@@ -136,6 +157,44 @@ export default {
       }
     });
   },
+  delTask() {
+    let that = this;
+    storage.get({
+      key: 'taskList',
+      success: function (data) {
+        console.log('get success');
+        if (data !== '') {
+          let todoList = JSON.parse(data).todoList;
+          let doneList = JSON.parse(data).doneList;
+          let index = that.index;
+          if (that.isDone) {
+            doneList.splice(index, 1);
+          }
+          else {
+            todoList.splice(index, 1);
+          }
+          let taskList = {
+            todoList: todoList,
+            doneList: doneList
+          };
+          storage.set({
+            key: 'taskList',
+            value: taskList,
+            success: function (data) {
+              console.log('save success');
+              router.back();
+            },
+            fail: function (data, code) {
+              console.log(`save fail, code = ${code}`);
+            }
+          });
+        }
+      },
+      fail: function (data, code) {
+        console.log(`get fail, code = ${code}`);
+      }
+    });
+  },
   //存储任务并返回任务列表
   addTask() {
     if (this.name === '') {
@@ -152,10 +211,24 @@ export default {
           if (data !== '') {
             let todoList = JSON.parse(data).todoList;
             let doneList = JSON.parse(data).doneList;
-            todoList.push({
-              name: that.name,
-              deadline: that.deadline
-            });
+            //如果是修改
+            if (that.isModify) {
+              let index = that.index;
+              if (that.isDone) {
+                doneList[index].name = that.name;
+                doneList[index].deadline = that.deadline;
+              }
+              else {
+                todoList[index].name = that.name;
+                todoList[index].deadline = that.deadline;
+              }
+            }
+            else {
+              todoList.push({
+                name: that.name,
+                deadline: that.deadline
+              });
+            }
             let taskList = {
               todoList: todoList,
               doneList: doneList
@@ -257,6 +330,10 @@ text {
 .image-calendar {
   width: 70px;
   padding-left: 20px;
+}
+
+.image-del {
+  margin-right: 30px;
 }
 
 .image-asr {

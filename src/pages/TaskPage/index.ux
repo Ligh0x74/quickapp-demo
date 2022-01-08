@@ -8,37 +8,57 @@
 
       <!-- 未完成任务 -->
       <block for="{{todoList}}">
-        <list-item type="task" class="list-item-task">
+        <list-item
+          type="task"
+          class="list-item-task"
+          @click="modify($item, $idx, false)"
+        >
           <image
             src="../../assets/images/todo.png"
             class="image-circle"
             @click="toFinish($idx, $item)"
           ></image>
           <text class="text-todo">{{ $item.name }}</text>
-          <image src="../../assets/images/star.png" class="image-star"></image>
+          <div class="date-area">
+            <image
+              src="../../assets/images/calendar.png"
+              class="image-calendar"
+            ></image>
+            <text class="text-deadline">{{ $item.deadline }}</text>
+          </div>
         </list-item>
       </block>
 
       <!-- 切换显示已完成任务 -->
       <list-item type="btn" class="list-item-btn" if="{{doneList.length}}">
         <image
-          src="{{arrowImgsrc}}"
+          src="{{isShowBtn ? arrowDown:arrowRight}}"
           class="image-arrow"
           @click="toggleDisplay"
         ></image>
-        <text>已完成&nbsp;{{ doneCount }}</text>
+        <text>已完成&nbsp;{{ doneList.length }}</text>
       </list-item>
 
       <!-- 已完成任务 -->
       <block for="{{doneList}}" if="{{isShowBtn}}">
-        <list-item type="task" class="list-item-task">
+        <list-item
+          type="task"
+          class="list-item-task"
+          @click="modify($item, $idx, true)"
+        >
           <image
             src="../../assets/images/done.png"
             class="image-circle-finish"
             @click="toUnfinish($idx, $item)"
           ></image>
           <text class="text-done">{{ $item.name }}</text>
-          <image src="../../assets/images/star.png" class="image-star"></image>
+          <div class="date-area">
+            <image
+              src="../../assets/images/calendar.png"
+              class="image-calendar"
+            ></image>
+            <text class="text-deadline">{{ $item.deadline }}</text>
+          </div>
         </list-item>
       </block>
 
@@ -67,23 +87,23 @@ export default {
     todoList: [],
     doneList: [],
     // todoList: [
-    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
-    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
-    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
-    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' }
+    //   { name: '吃饭', deadline: '2020-10-10' },
+    //   { name: '睡觉', deadline: '2020-8-28' },
+    //   { name: '打code', deadline: '2020-10-10' },
+    //   { name: '吃饭', deadline: '2020-8-28' },
+    //   { name: '睡觉', deadline: '2020-10-10' },
+    //   { name: '打code', deadline: '2020-8-28' },
+    //   { name: '吃饭', deadline: '2020-10-10' },
+    //   { name: '睡觉', deadline: '2020-8-28' }
     // ],
     // doneList: [
-    //   { name: '我爱天大', start: '2020-7-27&1:23', end: '2020-7-28&1:23' },
-    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' }
+    //   { name: '打code', deadline: '2020-7-27' },
+    //   { name: '吃饭', deadline: '2020-10-10' },
+    //   { name: '睡觉', deadline: '2020-8-28' }
     // ],
-    arrowImgsrc: '../../assets/images/arrow_down.png',
-    isShowBtn: true,
-    doneCount: 0
+    arrowDown: '../../assets/images/arrow_down.png',
+    arrowRight: '../../assets/images/arrow_right.png',
+    isShowBtn: true
   },
   onInit() {
     // storage.clear();
@@ -95,23 +115,35 @@ export default {
     this.saveList();
   },
   //将任务状态从未完成切换为完成
-  toFinish(index, item) {
+  toFinish(index, item, e) {
+    //阻止冒泡
+    e.stopPropagation();
     this.todoList.splice(index, 1);
     this.doneList.unshift(item);
-    this.doneCount = this.doneList.length;
   },
   //将任务状态从完成切换为未完成
-  toUnfinish(index, item) {
+  toUnfinish(index, item, e) {
+    //阻止冒泡
+    e.stopPropagation();
     this.doneList.splice(index, 1);
     this.todoList.push(item);
-    this.doneCount = this.doneList.length;
   },
   //切换已完成任务的显示状态
   toggleDisplay() {
     this.isShowBtn = !this.isShowBtn;
-    const arrowDown = '../../assets/images/arrow_down.png';
-    const arrowRight = '../../assets/images/arrow_right.png';
-    this.arrowImgsrc = this.isShowBtn ? arrowDown : arrowRight;
+  },
+  //修改任务
+  modify(task, index, isDone) {
+    // console.log(task);
+    router.push({
+      uri: 'pages/Input',
+      params: {
+        task: task,
+        index: index,
+        isModify: true,
+        isDone: isDone
+      }
+    })
   },
   //跳转到输入页面
   addTask() {
@@ -200,6 +232,12 @@ export default {
   position: relative;
 }
 
+.date-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* 文本样式 */
 
 text {
@@ -221,6 +259,13 @@ text {
   width: 75%;
 }
 
+.text-deadline {
+  width: 250px;
+  font-size: 30px;
+  margin-left: 20px;
+  color: #808080;
+}
+
 /* 图像样式 */
 
 .image-circle,
@@ -230,6 +275,10 @@ text {
 }
 
 .image-arrow {
+  width: 50px;
+}
+
+.image-calendar {
   width: 50px;
 }
 

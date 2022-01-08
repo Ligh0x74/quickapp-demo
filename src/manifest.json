@@ -38,7 +38,7 @@
     "logLevel": "debug"
   },
   "router": {
-    "entry": "pages/MainPage",
+    "entry": "pages/TaskPage",
     "pages": {
       "pages/MainPage": {
         "component": "index"
