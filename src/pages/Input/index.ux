@@ -1,9 +1,11 @@
 <template>
   <div class="input">
+    <!-- 标题 -->
     <div class="header-area">
       <text class="header-text">Add Task</text>
     </div>
 
+    <!-- 表单 -->
     <div class="form-area">
       <text>Task Name</text>
       <div class="text-area">
@@ -13,10 +15,19 @@
           class="input-text"
           model:value="{{name}}"
         />
+        <image
+          src="../../assets/images/microphone.png"
+          class="image-micro"
+          @click="showAsrBtn"
+        ></image>
       </div>
 
       <text>Deadline</text>
       <div class="date-area">
+        <image
+          src="../../assets/images/calendar.png"
+          class="image-calendar"
+        ></image>
         <picker
           class="date-picker"
           type="date"
@@ -25,9 +36,19 @@
         ></picker>
       </div>
 
+      <!-- 提交按钮 -->
       <div class="btn-area">
         <input type="button" value="OK" class="input-btn" @click="addTask" />
       </div>
+    </div>
+    <!-- 语音按钮 -->
+    <div
+      class="asr-area"
+      if="{{isShowAsr}}"
+      @touchstart="startAsr"
+      @touchend="stopAsr"
+    >
+      <image src="../../assets/images/microphone.png" class="image-asr"></image>
     </div>
   </div>
 </template>
@@ -36,14 +57,25 @@
 import prompt from '@system.prompt'
 import storage from '@system.storage'
 import router from '@system.router'
+import asr from '@service.asr'
+import vibrator from '@system.vibrator'
 
 export default {
   data: {
     name: '',
-    deadline: ''
+    deadline: '',
+    isShowAsr: false,
+    asrName: ''
   },
   onInit() {
-    // 初始化截止日期
+    this.initAsr();
+    this.initDate();
+  },
+  onDestroy() {
+    asr.close();
+  },
+  // 初始化截止日期
+  initDate() {
     const date = new Date();
     const Y = date.getFullYear();
     const M = date.getMonth() + 1;
@@ -53,6 +85,52 @@ export default {
   //获取截止日期更新
   getDeadline(e) {
     this.deadline = e.year + '-' + (e.month + 1) + '-' + e.day;
+  },
+  initAsr() {
+    asr.init({
+      fail: function (data, code) {
+        prompt.showToast({
+          message: `init fail, code=${code}, data=${data}`
+        });
+      }
+    })
+    asr.onpartialresult = ({ result }) => {
+      this.name = this.asrName + `${result}`;
+    }
+    asr.oncompleteresult = ({ result }) => {
+      this.name = this.asrName + `${result.match(/\[(.*)\]/)[1]}`;
+    }
+    asr.onerror = (error) => {
+      this.name = `onerror: ${error}`;
+    }
+  },
+  showAsrBtn() {
+    this.isShowAsr = !this.isShowAsr;
+  },
+  startAsr() {
+    let that = this;
+    this.asrName = this.name;
+    asr.start({
+      success: function () {
+        vibrator.vibrate({ mode: 'short' });
+      },
+      fail: function (data, code) {
+        prompt.showToast({
+          message: `start fail, code=${code}, data=${data}`
+        });
+      }
+    });
+  },
+  stopAsr() {
+    let that = this;
+    asr.stop({
+      success: function () { },
+      fail: function (data, code) {
+        prompt.showToast({
+          message: `stop fail, code=${code}, data=${data}`
+        });
+      }
+    });
   },
   //存储任务并返回任务列表
   addTask() {
@@ -109,11 +187,31 @@ export default {
 .text-area,
 .date-area {
   margin: 10px;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .btn-area {
   align-self: flex-end;
   padding: 20px;
+}
+
+.asr-area {
+  position: absolute;
+  bottom: 200px;
+  background-color: #ffffff;
+  border-radius: 60px;
+  border: 1px solid rgb(243, 230, 240);
+  align-self: center;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* 文本样式 */
@@ -129,13 +227,26 @@ text {
   font-size: 60px;
 }
 
+/* 图像样式 */
+.image-micro {
+  width: 70px;
+  padding-right: 20px;
+}
+
+.image-calendar {
+  width: 70px;
+  padding-left: 20px;
+}
+
+.image-asr {
+  width: 100px;
+}
+
 /* 表单样式 */
 .input-text,
 .date-picker {
-  width: 100%;
+  width: 80%;
   padding: 20px;
-  border: 1px solid #000000;
-  border-radius: 5px;
 }
 
 .input-btn {

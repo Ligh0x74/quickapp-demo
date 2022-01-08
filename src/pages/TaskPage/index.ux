@@ -109,11 +109,13 @@ export default {
     const arrowRight = '../../assets/images/arrow_right.png';
     this.arrowImgsrc = this.isShowBtn ? arrowDown : arrowRight;
   },
+  //跳转到输入页面
   addTask() {
     router.push({
       uri: 'pages/Input'
     })
   },
+  //更新列表
   updateList() {
     let that = this;
     storage.get({

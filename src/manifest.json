@@ -17,6 +17,15 @@
     },
     {
       "name": "system.fetch"
+    },
+    {
+      "name": "service.asr"
+    },
+    {
+      "name": "system.vibrator"
+    },
+    {
+      "name": "system.storage"
     }
   ],
   "permissions": [
