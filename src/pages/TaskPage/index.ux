@@ -64,31 +64,35 @@ import storage from '@system.storage'
 export default {
   data: {
     listName: 'To Do',
-    todoList: [
-      { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-      { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
-      { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-      { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
-      { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-      { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
-      { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-      { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' }
-    ],
-    doneList: [
-      { name: '我爱天大', start: '2020-7-27&1:23', end: '2020-7-28&1:23' },
-      { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
-      { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' }
-    ],
+    todoList: [],
+    doneList: [],
+    // todoList: [
+    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
+    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
+    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
+    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
+    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
+    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' },
+    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
+    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' }
+    // ],
+    // doneList: [
+    //   { name: '我爱天大', start: '2020-7-27&1:23', end: '2020-7-28&1:23' },
+    //   { name: '吃个饭', start: '2020-10-10&3:1', end: '2020-11-1&3:1' },
+    //   { name: '刷个碗', start: '2020-8-28&12:15', end: '2021-1-1&12:16' }
+    // ],
     arrowImgsrc: '../../assets/images/arrow_down.png',
     isShowBtn: true,
     doneCount: 0
   },
   onInit() {
-    this.doneCount = this.doneList.length;
-    this.updateList();
+    // storage.clear();
   },
   onShow() {
     this.updateList();
+  },
+  onHide() {
+    this.saveList();
   },
   //将任务状态从未完成切换为完成
   toFinish(index, item) {
@@ -119,14 +123,35 @@ export default {
   updateList() {
     let that = this;
     storage.get({
-      key: 'task',
+      key: 'taskList',
       success: function (data) {
-        console.log(data);
-        console.log('handling success');
-        that.todoList.push(JSON.parse(data));
+        // console.log(data);
+        console.log('update success');
+        if (data !== '') {
+          that.todoList = JSON.parse(data).todoList;
+          that.doneList = JSON.parse(data).doneList;
+          that.doneCount = that.doneList.length;
+        }
       },
       fail: function (data, code) {
-        console.log(`handling fail, code = ${code}`);
+        console.log(`update fail, code = ${code}`);
+      }
+    });
+  },
+  saveList() {
+    let taskList = {
+      todoList: this.todoList,
+      doneList: this.doneList
+    };
+    let that = this;
+    storage.set({
+      key: 'taskList',
+      value: taskList,
+      success: function (data) {
+        console.log('save success');
+      },
+      fail: function (data, code) {
+        console.log(`save fail, code = ${code}`);
       }
     });
   }

@@ -72,7 +72,7 @@ export default {
     this.initDate();
   },
   onDestroy() {
-    asr.close();
+    // asr.close();
   },
   // 初始化截止日期
   initDate() {
@@ -86,6 +86,7 @@ export default {
   getDeadline(e) {
     this.deadline = e.year + '-' + (e.month + 1) + '-' + e.day;
   },
+  //初始化语音识别
   initAsr() {
     asr.init({
       fail: function (data, code) {
@@ -104,9 +105,11 @@ export default {
       this.name = `onerror: ${error}`;
     }
   },
+  //切换语音按钮显示
   showAsrBtn() {
     this.isShowAsr = !this.isShowAsr;
   },
+  //开始语音识别
   startAsr() {
     let that = this;
     this.asrName = this.name;
@@ -121,6 +124,7 @@ export default {
       }
     });
   },
+  //结束语音识别
   stopAsr() {
     let that = this;
     asr.stop({
@@ -140,20 +144,37 @@ export default {
       })
     }
     else {
-      let task = {
-        name: this.name,
-        deadline: this.deadline
-      };
       let that = this;
-      storage.set({
-        key: 'task',
-        value: task,
+      storage.get({
+        key: 'taskList',
         success: function (data) {
-          console.log('handling success');
-          router.back();
+          console.log('get success');
+          if (data !== '') {
+            let todoList = JSON.parse(data).todoList;
+            let doneList = JSON.parse(data).doneList;
+            todoList.push({
+              name: that.name,
+              deadline: that.deadline
+            });
+            let taskList = {
+              todoList: todoList,
+              doneList: doneList
+            };
+            storage.set({
+              key: 'taskList',
+              value: taskList,
+              success: function (data) {
+                console.log('save success');
+                router.back();
+              },
+              fail: function (data, code) {
+                console.log(`save fail, code = ${code}`);
+              }
+            });
+          }
         },
         fail: function (data, code) {
-          console.log(`handling fail, code = ${code}`);
+          console.log(`get fail, code = ${code}`);
         }
       });
     }
