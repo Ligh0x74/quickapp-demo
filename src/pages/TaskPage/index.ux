@@ -30,21 +30,21 @@
       </block>
 
       <!-- 切换显示已完成任务 -->
-      <list-item type="btn" class="list-item-btn" if="{{doneList.length}}">
+      <list-item type="btn" class="list-item-btn" if="{{doneList.length}}" @click="toggleDisplay">
         <image
           src="{{isShowBtn ? arrowDown:arrowRight}}"
           class="image-arrow"
-          @click="toggleDisplay"
         ></image>
         <text>已完成&nbsp;{{ doneList.length }}</text>
       </list-item>
 
       <!-- 已完成任务 -->
-      <block for="{{doneList}}" if="{{isShowBtn}}">
+      <block for="{{doneList}}">
         <list-item
           type="task"
           class="list-item-task"
           @click="modify($item, $idx, true)"
+          show="{{isShowBtn}}"
         >
           <image
             src="../../assets/images/done.png"
@@ -243,6 +243,8 @@ export default {
 text {
   font-size: 35px;
   color: #000000;
+  margin-right: 30px;
+  lines: 1;
 }
 
 .text-header {
